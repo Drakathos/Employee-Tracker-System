@@ -2,11 +2,20 @@ let employeesData = [];
 let filteredData = [];
 let chartInstance = null;
 let sortDirection = {};
+let nextId = 1000; // Start from 1000 for manually added employees
+
+// Month order for proper sorting
+const monthOrder = {
+  'January': 1, 'February': 2, 'March': 3, 'April': 4,
+  'May': 5, 'June': 6, 'July': 7, 'August': 8,
+  'September': 9, 'October': 10, 'November': 11, 'December': 12
+};
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupEventListeners();
+  setupModalListeners();
 });
 
 // Load data from JSON
@@ -23,6 +32,11 @@ function loadData() {
         performanceScore: emp.performance
       }));
       filteredData = [...employeesData];
+      
+      // Find the highest ID for manual additions
+      if (employeesData.length > 0) {
+        nextId = Math.max(...employeesData.map(e => e.id)) + 1;
+      }
       
       populateFilters();
       updateMetrics();
@@ -42,15 +56,97 @@ function setupEventListeners() {
   document.getElementById('monthFilter').addEventListener('change', applyFilters);
   document.getElementById('resetFilters').addEventListener('click', resetFilters);
   document.getElementById('searchBox').addEventListener('input', applyFilters);
+  document.getElementById('addEmployeeBtn').addEventListener('click', openModal);
+}
+
+// Setup modal listeners
+function setupModalListeners() {
+  const modal = document.getElementById('addEmployeeModal');
+  const closeBtn = document.querySelector('.close');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const form = document.getElementById('addEmployeeForm');
+  
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  
+  window.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+  
+  form.addEventListener('submit', handleAddEmployee);
+}
+
+// Open modal
+function openModal() {
+  document.getElementById('addEmployeeModal').style.display = 'block';
+  document.getElementById('addEmployeeForm').reset();
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById('addEmployeeModal').style.display = 'none';
+}
+
+// Handle add employee form submission
+function handleAddEmployee(e) {
+  e.preventDefault();
+  
+  const newEmployee = {
+    id: nextId++,
+    name: document.getElementById('empName').value.trim(),
+    department: document.getElementById('empDepartment').value,
+    month: document.getElementById('empMonth').value,
+    attendance: parseInt(document.getElementById('empAttendance').value),
+    total_days: parseInt(document.getElementById('empTotalDays').value),
+    performance: parseInt(document.getElementById('empPerformance').value),
+    overtime: parseFloat(document.getElementById('empOvertime').value)
+  };
+  
+  // Validate attendance
+  if (newEmployee.attendance > newEmployee.total_days) {
+    alert('Days attended cannot exceed total working days!');
+    return;
+  }
+  
+  // Calculate percentage
+  newEmployee.attendancePct = (newEmployee.attendance / newEmployee.total_days) * 100;
+  newEmployee.performanceScore = newEmployee.performance;
+  
+  // Add to data
+  employeesData.push(newEmployee);
+  
+  // Update filters if new department
+  const deptFilter = document.getElementById('departmentFilter');
+  const deptExists = Array.from(deptFilter.options).some(opt => opt.value === newEmployee.department);
+  if (!deptExists && newEmployee.department) {
+    const option = document.createElement('option');
+    option.value = newEmployee.department;
+    option.textContent = newEmployee.department;
+    deptFilter.appendChild(option);
+  }
+  
+  closeModal();
+  applyFilters();
+  
+  // Show success message
+  alert(`Employee record for ${newEmployee.name} added successfully!`);
 }
 
 // Populate filter dropdowns
 function populateFilters() {
   const departments = [...new Set(employeesData.map(e => e.department))].sort();
-  const months = [...new Set(employeesData.map(e => e.month))].sort();
+  const months = [...new Set(employeesData.map(e => e.month))].sort((a, b) => {
+    return monthOrder[a] - monthOrder[b];
+  });
   
   const deptFilter = document.getElementById('departmentFilter');
   const monthFilter = document.getElementById('monthFilter');
+  
+  // Clear existing options except "All"
+  deptFilter.innerHTML = '<option value="all">All Departments</option>';
+  monthFilter.innerHTML = '<option value="all">All Months</option>';
   
   departments.forEach(dept => {
     const option = document.createElement('option');
@@ -125,7 +221,12 @@ function displayTable(employees) {
   tableBody.innerHTML = '';
   recordCount.textContent = `Showing ${employees.length} record${employees.length !== 1 ? 's' : ''}`;
   
-  employees.forEach(emp => {
+  // Sort by month order
+  const sortedEmployees = [...employees].sort((a, b) => {
+    return monthOrder[a.month] - monthOrder[b.month];
+  });
+  
+  sortedEmployees.forEach(emp => {
     const attendancePct = emp.attendancePct;
     const isLowAttendance = attendancePct < 75;
     const isLowPerformance = emp.performance < 70;
@@ -244,8 +345,18 @@ function sortTable(column) {
   }
   
   filteredData.sort((a, b) => {
-    let valA = column === 'attendance' ? a.attendancePct : a[column];
-    let valB = column === 'attendance' ? b.attendancePct : b[column];
+    let valA, valB;
+    
+    if (column === 'attendance') {
+      valA = a.attendancePct;
+      valB = b.attendancePct;
+    } else if (column === 'month') {
+      valA = monthOrder[a.month];
+      valB = monthOrder[b.month];
+    } else {
+      valA = a[column];
+      valB = b[column];
+    }
     
     if (typeof valA === 'string') {
       valA = valA.toLowerCase();
