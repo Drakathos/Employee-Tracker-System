@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Tracking System</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Employee Attendance & Performance Tracker</h1>
+      <p class="subtitle">Monitor employee metrics and trends</p>
+    </header>
+
+    <section class="filters">
+      <div class="filter-group">
+        <label for="departmentFilter">Department:</label>
+        <select id="departmentFilter">
+          <option value="all">All Departments</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="monthFilter">Month:</label>
+        <select id="monthFilter">
+          <option value="all">All Months</option>
+        </select>
+      </div>
+
+      <button id="resetFilters" class="btn-secondary">Reset Filters</button>
+    </section>
+
+    <section class="metrics-summary">
+      <div class="metric-card">
+        <h3>Total Employees</h3>
+        <p id="totalEmployees">-</p>
+      </div>
+      <div class="metric-card">
+        <h3>Avg Attendance</h3>
+        <p id="avgAttendance">-</p>
+      </div>
+      <div class="metric-card">
+        <h3>Avg Performance</h3>
+        <p id="avgPerformance">-</p>
+      </div>
+      <div class="metric-card">
+        <h3>Total Overtime</h3>
+        <p id="totalOvertime">-</p>
+      </div>
+    </section>
+
+    <section class="dashboard">
+      <h2>Attendance Trends</h2>
+      <div class="chart-container">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <h2>Employee Records</h2>
+      <div class="table-controls">
+        <input type="text" id="searchBox" placeholder="Search by name...">
+        <span id="recordCount">Showing 0 records</span>
+      </div>
+      <div class="table-wrapper">
+        <table id="employeeTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable('name')">Name ↕</th>
+              <th onclick="sortTable('department')">Department ↕</th>
+              <th onclick="sortTable('month')">Month ↕</th>
+              <th onclick="sortTable('attendance')">Attendance % ↕</th>
+              <th onclick="sortTable('performance')">Performance ↕</th>
+              <th onclick="sortTable('overtime')">Overtime (hrs) ↕</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="loading">
+              <td colspan="7">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>Employee Tracking System &copy; 2024</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
