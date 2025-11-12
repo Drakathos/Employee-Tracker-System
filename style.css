@@ -1,4 +1,7 @@
-* {
+.actions-header {
+  width: 80px;
+  text-align: center;
+}* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -255,12 +258,11 @@ td {
 }
 
 tbody tr {
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 tbody tr:hover {
   background: #f8f9fa;
-  transform: scale(1.01);
 }
 
 .low {
@@ -291,6 +293,84 @@ tbody tr:hover {
 
 .status-cell {
   font-weight: 600;
+}
+
+.actions-cell {
+  text-align: center;
+  position: relative;
+}
+
+/* Dropdown Menu */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px 12px;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.dropdown-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.dropdown-content.show {
+  display: block;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-content a {
+  color: #495057;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.dropdown-content a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-content a:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-content a.delete-action:hover {
+  background-color: #fff5f5;
+  color: #dc3545;
 }
 
 .loading,
@@ -339,7 +419,7 @@ footer {
   padding: 0;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideDown 0.3s ease;
 }
@@ -370,7 +450,8 @@ footer {
   font-size: 1.5rem;
 }
 
-.close {
+.close,
+.close-delete {
   font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
@@ -378,7 +459,8 @@ footer {
   line-height: 1;
 }
 
-.close:hover {
+.close:hover,
+.close-delete:hover {
   transform: rotate(90deg);
   opacity: 0.7;
 }
@@ -440,6 +522,69 @@ footer {
   transition: all 0.3s ease;
 }
 
+.actions-header {
+  width: 80px;
+  text-align: center;
+}
+
+/* Delete Modal Styles */
+.delete-modal {
+  max-width: 500px;
+}
+
+.delete-modal-body {
+  padding: 30px;
+}
+
+.delete-modal-body > p:first-child {
+  font-size: 1rem;
+  color: #495057;
+  margin-bottom: 20px;
+}
+
+.delete-info {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 3px solid #6c757d;
+}
+
+.delete-info p {
+  margin: 6px 0;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.delete-info strong {
+  color: #2c3e50;
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+.warning-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  text-align: center;
+  font-style: italic;
+}
+
+.btn-delete {
+  padding: 10px 24px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  background: #c82333;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   header h1 {
@@ -495,7 +640,7 @@ footer {
   header {
     padding: 20px;
   }
-  
+
   header h1 {
     font-size: 1.5rem;
   }
@@ -506,5 +651,10 @@ footer {
   
   .metric-card p {
     font-size: 1.5rem;
+  }
+  
+  .dropdown-btn {
+    font-size: 1.3rem;
+    padding: 2px 8px;
   }
 }
