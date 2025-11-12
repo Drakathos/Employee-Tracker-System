@@ -3,6 +3,8 @@ let filteredData = [];
 let chartInstance = null;
 let sortDirection = {};
 let nextId = 1000; // Start from 1000 for manually added employees
+let deleteEmployeeId = null; // Store ID of employee to be deleted
+let editEmployeeId = null; // Store ID of employee to be edited
 
 // Month order for proper sorting
 const monthOrder = {
@@ -16,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupEventListeners();
   setupModalListeners();
+  setupDeleteModalListeners();
+  setupEditModalListeners();
 });
 
 // Load data from JSON
@@ -46,7 +50,7 @@ function loadData() {
     .catch(error => {
       console.error('Error loading data:', error);
       document.querySelector('#employeeTable tbody').innerHTML = 
-        '<tr><td colspan="7" class="error">Failed to load data. Please check data.json file.</td></tr>';
+        '<tr><td colspan="8" class="error">Failed to load data. Please check data.json file.</td></tr>';
     });
 }
 
@@ -78,6 +82,111 @@ function setupModalListeners() {
   form.addEventListener('submit', handleAddEmployee);
 }
 
+// Setup edit modal listeners
+function setupEditModalListeners() {
+  const editModal = document.getElementById('editEmployeeModal');
+  const closeEditBtn = document.querySelector('.close-edit');
+  const cancelEditBtn = document.getElementById('cancelEditBtn');
+  const editForm = document.getElementById('editEmployeeForm');
+  
+  closeEditBtn.addEventListener('click', closeEditModal);
+  cancelEditBtn.addEventListener('click', closeEditModal);
+  
+  window.addEventListener('click', (e) => {
+    if (e.target === editModal) {
+      closeEditModal();
+    }
+  });
+  
+  editForm.addEventListener('submit', handleEditEmployee);
+}
+
+// Open edit modal
+function openEditModal(employeeId) {
+  const employee = employeesData.find(emp => emp.id === employeeId);
+  if (!employee) return;
+  
+  editEmployeeId = employeeId;
+  
+  // Populate form with existing data
+  document.getElementById('editEmpName').value = employee.name;
+  document.getElementById('editEmpDepartment').value = employee.department;
+  document.getElementById('editEmpMonth').value = employee.month;
+  document.getElementById('editEmpAttendance').value = employee.attendance;
+  document.getElementById('editEmpTotalDays').value = employee.total_days;
+  document.getElementById('editEmpPerformance').value = employee.performance;
+  document.getElementById('editEmpOvertime').value = employee.overtime;
+  
+  document.getElementById('editEmployeeModal').style.display = 'block';
+  
+  // Close any open dropdowns
+  const dropdowns = document.querySelectorAll('.dropdown-content');
+  dropdowns.forEach(dropdown => dropdown.classList.remove('show'));
+}
+
+// Close edit modal
+function closeEditModal() {
+  document.getElementById('editEmployeeModal').style.display = 'none';
+  editEmployeeId = null;
+}
+
+// Handle edit employee form submission
+function handleEditEmployee(e) {
+  e.preventDefault();
+  
+  const updatedData = {
+    name: document.getElementById('editEmpName').value.trim(),
+    department: document.getElementById('editEmpDepartment').value,
+    month: document.getElementById('editEmpMonth').value,
+    attendance: parseInt(document.getElementById('editEmpAttendance').value),
+    total_days: parseInt(document.getElementById('editEmpTotalDays').value),
+    performance: parseInt(document.getElementById('editEmpPerformance').value),
+    overtime: parseFloat(document.getElementById('editEmpOvertime').value)
+  };
+  
+  // Validate attendance
+  if (updatedData.attendance > updatedData.total_days) {
+    alert('Days attended cannot exceed total working days!');
+    return;
+  }
+  
+  // Find and update the employee
+  const empIndex = employeesData.findIndex(emp => emp.id === editEmployeeId);
+  if (empIndex !== -1) {
+    employeesData[empIndex] = {
+      ...employeesData[empIndex],
+      ...updatedData,
+      attendancePct: (updatedData.attendance / updatedData.total_days) * 100,
+      performanceScore: updatedData.performance
+    };
+  }
+  
+  closeEditModal();
+  applyFilters();
+  
+  // Show success message
+  alert(`Employee record for ${updatedData.name} updated successfully!`);
+}
+
+// Setup delete modal listeners
+function setupDeleteModalListeners() {
+  const deleteModal = document.getElementById('deleteModal');
+  const closeDeleteBtn = document.querySelector('.close-delete');
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  
+  closeDeleteBtn.addEventListener('click', closeDeleteModal);
+  cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+  
+  window.addEventListener('click', (e) => {
+    if (e.target === deleteModal) {
+      closeDeleteModal();
+    }
+  });
+  
+  confirmDeleteBtn.addEventListener('click', confirmDelete);
+}
+
 // Open modal
 function openModal() {
   document.getElementById('addEmployeeModal').style.display = 'block';
@@ -87,6 +196,49 @@ function openModal() {
 // Close modal
 function closeModal() {
   document.getElementById('addEmployeeModal').style.display = 'none';
+}
+
+// Open delete modal
+function openDeleteModal(employeeId) {
+  const employee = employeesData.find(emp => emp.id === employeeId);
+  if (!employee) return;
+  
+  deleteEmployeeId = employeeId;
+  document.getElementById('deleteEmpName').textContent = employee.name;
+  document.getElementById('deleteEmpDept').textContent = employee.department;
+  document.getElementById('deleteEmpMonth').textContent = employee.month;
+  document.getElementById('deleteModal').style.display = 'block';
+  
+  // Close any open dropdowns
+  const dropdowns = document.querySelectorAll('.dropdown-content');
+  dropdowns.forEach(dropdown => dropdown.classList.remove('show'));
+}
+
+// Close delete modal
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+  deleteEmployeeId = null;
+}
+
+// Confirm and execute delete
+function confirmDelete() {
+  if (deleteEmployeeId === null) return;
+  
+  // Find the employee for confirmation message
+  const employee = employeesData.find(emp => emp.id === deleteEmployeeId);
+  const employeeName = employee ? employee.name : 'Employee';
+  
+  // Remove from data array
+  employeesData = employeesData.filter(emp => emp.id !== deleteEmployeeId);
+  
+  // Close modal
+  closeDeleteModal();
+  
+  // Reapply filters and update display
+  applyFilters();
+  
+  // Show success message
+  alert(`Record for ${employeeName} has been successfully deleted.`);
 }
 
 // Handle add employee form submission
@@ -213,7 +365,7 @@ function displayTable(employees) {
   const recordCount = document.getElementById('recordCount');
   
   if (employees.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="7" class="no-data">No records found</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="8" class="no-data">No records found</td></tr>';
     recordCount.textContent = 'Showing 0 records';
     return;
   }
@@ -233,8 +385,8 @@ function displayTable(employees) {
     const status = (isLowAttendance || isLowPerformance) ? 'low' : 'good';
     
     const statusText = status === 'low' 
-      ? `⚠️ ${isLowAttendance ? 'Low Attendance' : ''} ${isLowPerformance ? 'Low Performance' : ''}`.trim()
-      : '✅ Good';
+      ? `Low ${isLowAttendance ? 'Attendance' : ''} ${isLowPerformance ? 'Performance' : ''}`.trim()
+      : 'Good';
     
     const row = document.createElement('tr');
     row.className = status;
@@ -246,11 +398,50 @@ function displayTable(employees) {
       <td><strong>${emp.performance}</strong></td>
       <td>${emp.overtime}</td>
       <td class="status-cell">${statusText}</td>
+      <td class="actions-cell">
+        <div class="dropdown">
+          <button class="dropdown-btn" onclick="toggleDropdown(event, ${emp.id})">⋮</button>
+          <div class="dropdown-content" id="dropdown-${emp.id}">
+            <a href="#" onclick="event.preventDefault(); openEditModal(${emp.id})">
+              Edit
+            </a>
+            <a href="#" onclick="event.preventDefault(); openDeleteModal(${emp.id})" class="delete-action">
+              Delete
+            </a>
+          </div>
+        </div>
+      </td>
     `;
     
     tableBody.appendChild(row);
   });
 }
+
+// Toggle dropdown menu
+function toggleDropdown(event, empId) {
+  event.stopPropagation();
+  const dropdown = document.getElementById(`dropdown-${empId}`);
+  const allDropdowns = document.querySelectorAll('.dropdown-content');
+  
+  // Close all other dropdowns
+  allDropdowns.forEach(dd => {
+    if (dd.id !== `dropdown-${empId}`) {
+      dd.classList.remove('show');
+    }
+  });
+  
+  dropdown.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.matches('.dropdown-btn')) {
+    const dropdowns = document.querySelectorAll('.dropdown-content');
+    dropdowns.forEach(dropdown => {
+      dropdown.classList.remove('show');
+    });
+  }
+});
 
 // Draw attendance chart
 function drawChart(employees) {
