@@ -1,7 +1,4 @@
-.actions-header {
-  width: 80px;
-  text-align: center;
-}* {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -311,14 +308,13 @@ tbody tr:hover {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  padding: 4px 12px;
+  padding: 4px 8px;
   color: #6c757d;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
   border-radius: 4px;
 }
 
 .dropdown-btn:hover {
-  background: #f8f9fa;
   color: #495057;
 }
 
@@ -327,7 +323,7 @@ tbody tr:hover {
   position: absolute;
   right: 0;
   background-color: white;
-  min-width: 140px;
+  min-width: 120px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 6px;
   z-index: 1000;
@@ -352,7 +348,7 @@ tbody tr:hover {
 
 .dropdown-content a {
   color: #495057;
-  padding: 10px 16px;
+  padding: 8px 16px;
   text-decoration: none;
   display: block;
   transition: all 0.2s ease;
@@ -419,7 +415,7 @@ footer {
   padding: 0;
   border-radius: 12px;
   width: 90%;
-  max-width: 700px;
+  max-width: 750px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideDown 0.3s ease;
 }
@@ -439,7 +435,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 25px 30px;
+  padding: 25px 40px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-radius: 12px 12px 0 0;
@@ -451,22 +447,27 @@ footer {
 }
 
 .close,
-.close-delete {
-  font-size: 2rem;
+.close-delete,
+.close-edit {
+  font-size: 2.5rem;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   line-height: 1;
+  opacity: 0.9;
+  color: white;
 }
 
 .close:hover,
-.close-delete:hover {
-  transform: rotate(90deg);
-  opacity: 0.7;
+.close-delete:hover,
+.close-edit:hover {
+  opacity: 1;
+  transform: scale(1.2);
 }
 
-#addEmployeeForm {
-  padding: 30px;
+#addEmployeeForm,
+#editEmployeeForm {
+  padding: 35px 40px;
 }
 
 .form-group {
@@ -500,7 +501,7 @@ footer {
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 25px;
 }
 
 .form-actions {
@@ -533,7 +534,7 @@ footer {
 }
 
 .delete-modal-body {
-  padding: 30px;
+  padding: 35px 40px;
 }
 
 .delete-modal-body > p:first-child {
